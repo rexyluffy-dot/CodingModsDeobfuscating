@@ -1,0 +1,50 @@
+name: Build AutoMace 1.21.11
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "8.14.3"
+
+      - name: Prepare supplied JAR and source ZIP
+        run: bash tools/prepare-input.sh
+
+      - name: Show source inventory
+        run: |
+          echo "=== Decompiled source ==="
+          unzip -l input/decompiled.zip
+          echo "=== Original JAR ==="
+          jar tf libs/original.jar | sed -n '1,200p'
+
+      - name: Compile and remap
+        run: gradle build --stacktrace
+
+      - name: Upload build outputs
+        if: success()
+        uses: actions/upload-artifact@v6
+        with:
+          name: automace-1.21.11-build
+          path: |
+            build/libs/*.jar
+            build/libs/*-sources.jar
