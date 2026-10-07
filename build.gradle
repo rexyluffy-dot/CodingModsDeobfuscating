@@ -13,45 +13,22 @@ repositories {
 def mcVersion = project.property("minecraft_version")
 def loaderVersion = project.property("loader_version")
 def fabricApiVersion = project.property("fabric_api_version")
-def generatedSourceRoot = layout.buildDirectory.dir("generated/decompiled")
-
-sourceSets {
-    main {
-        java.srcDirs(generatedSourceRoot)
-        resources.srcDirs(generatedSourceRoot)
-    }
-}
 
 dependencies {
     minecraft "com.mojang:minecraft:" + mcVersion
     mappings "net.fabricmc:intermediary:" + mcVersion + ":v2"
     modImplementation "net.fabricmc:fabric-loader:" + loaderVersion
     modImplementation "net.fabricmc.fabric-api:fabric-api:" + fabricApiVersion
-    compileOnly files("libs/original.jar")
-}
-
-def unpackDecompiled = tasks.register("unpackDecompiled", Sync) {
-    from(zipTree(file("input/decompiled.zip"))) {
-        exclude("META-INF/**")
-    }
-    into(generatedSourceRoot)
-}
-
-tasks.named("compileJava") {
-    dependsOn(unpackDecompiled)
-    options.encoding = "UTF-8"
-    options.release = 21
-}
-
-tasks.named("processResources") {
-    dependsOn(unpackDecompiled)
-    exclude("**/*.java")
-    exclude("META-INF/**")
 }
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = 21
 }
 
 tasks.named("jar") {
