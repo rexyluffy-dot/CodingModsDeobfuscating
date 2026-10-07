@@ -1,8 +1,6 @@
 name: Build AutoMace 1.21.11
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:
