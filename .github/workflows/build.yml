@@ -1,6 +1,8 @@
 name: Build AutoMace 1.21.11
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -24,16 +26,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: "8.14.3"
-
-      - name: Prepare supplied JAR and source ZIP
-        run: bash tools/prepare-input.sh
-
-      - name: Show source inventory
-        run: |
-          echo "=== Decompiled source ==="
-          unzip -l input/decompiled.zip
-          echo "=== Original JAR ==="
-          jar tf libs/original.jar | sed -n '1,200p'
 
       - name: Compile and remap
         run: gradle build --stacktrace
